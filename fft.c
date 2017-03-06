@@ -1,9 +1,11 @@
 
 #include "types.h"
 
+#include "math.h"
+
 typedef struct {
-	float real;
-	float imag;
+    float real;
+    float imag;
 } COMPLEX;
 
 const float sin_tb[] = {  // 精度(PI PI/2 PI/4 PI/8 PI/16 ... PI/(2^k))
@@ -29,14 +31,14 @@ const float cos_tb[] = {  // 精度(PI PI/2 PI/4 PI/8 PI/16 ... PI/(2^k))
  * @outputs 
  * @retval  
  */
-int ones_32(U32 n)
+S32 ones_32(U32 n)
 {
-	unsigned int c =0 ;
-	for (c = 0; n; ++c)
-	{
-		n &= (n -1) ; // 清除最低位的1
-	}
-	return c ;
+    U32 c =0 ;
+    for (c = 0; n; ++c)
+    {
+        n &= (n -1) ; // 清除最低位的1
+    }
+    return c ;
 }
 
 
@@ -69,11 +71,11 @@ U32 floor_log2_32(U32 x)
  * the @x contains the result of FFT algorithm, so the original data
  * in @x is destroyed, please store them before using FFT.
  */
-int fft(COMPLEX *x, U32 N)
+S32 fft(COMPLEX *x, U32 N)
 {
-	int i,j,l,k,ip;
+	S32 i,j,l,k,ip;
 	static U32 M = 0;
-	static int le,le2;
+	static S32 le,le2;
 	static float sR,sI,tR,tI,uR,uI;
 
 	M = floor_log2_32(N);
@@ -105,9 +107,9 @@ int fft(COMPLEX *x, U32 N)
 	 * For Loops
 	 */
 	for (l=1; l<=M; l++) {   /* loop for ceil{log2(N)} */
-		//le = (int)pow(2,l);
-		le  = (int)(1 << l);
-		le2 = (int)(le >> 1);
+		//le = (S32)pow(2,l);
+		le  = (S32)(1 << l);
+		le2 = (S32)(le >> 1);
 		uR = 1;
 		uI = 0;
 
@@ -144,9 +146,9 @@ int fft(COMPLEX *x, U32 N)
  * the @x contains the result of FFT algorithm, so the original data
  * in @x is destroyed, please store them before using FFT.
  */
-int ifft(COMPLEX *x, U32 N)
+S32 ifft(COMPLEX *x, U32 N)
 {
-	int k = 0;
+	S32 k = 0;
 
 	for (k=0; k<=N-1; k++) {
 		x[k].imag = -x[k].imag;
@@ -162,10 +164,80 @@ int ifft(COMPLEX *x, U32 N)
 	return 0;
 }
 
-void main()
+#ifndef PI
+#define PI 3.141592653
+#endif
+
+U32 complex_zero(COMPLEX* x)
 {
-	COMPLEX x[4];
-	fft(x, 4);
-	ifft(x,4);  
+	if (x->real<0.0001 && x->real>-0.0001 && x->imag<0.0001 && x->imag>-0.0001)
+		return 1;
+	return 0;
 }
 
+U32 complex_trunc(COMPLEX x[], U32 num, U32 param)
+{
+	U32 i,j;
+
+	for (i=0; i<num; i++)
+	{
+		if (!complex_zero(&x[0]))
+		{
+			return 1;
+		}
+		else
+		{
+			for (j=0; j<num-1; j++)
+			{
+				x[j] = x[j+1];
+			}
+			x[num-1].real = 0;
+			x[num-1].imag = 0;
+		}
+	}
+	return 0;
+}
+
+void freq_small(COMPLEX x[], U32 num, U32 param)
+{
+	
+}
+
+void freq_large(COMPLEX x[], U32 num, U32 param)
+{
+	
+}
+
+void main()
+{
+	U32 i=0;
+	const U32 NUM=16;
+	COMPLEX x[NUM];
+	memset(x, 0, sizeof(x));
+
+	for (i=0; i<NUM; i++)
+	{
+		x[i].real=sin(PI * i / 8);
+
+		if (x[i].real<0)
+			x[i].real=sin(PI * i / 8);
+		
+		x[i].imag=0;
+	}
+
+	for (i=0; i<NUM; i++){HPRINTF("%f,%f\n", x[i].real, x[i].imag);} HPRINTF("--------------\n");
+
+	fft(x, NUM);
+
+	for (i=0; i<NUM; i++){HPRINTF("%f,%f\n", x[i].real, x[i].imag);} HPRINTF("--------------\n");
+
+	for (i=0; i<NUM; i++)
+	{
+		if ((x[i].real<0.0001 && x[i].real>-0.0001 && x[i].imag<0.0001 && x[i].imag>-0.0001))
+			;
+	}
+
+	ifft(x,NUM);
+	
+	for (i=0; i<NUM; i++){HPRINTF("%f,%f\n", x[i].real, x[i].imag);} HPRINTF("--------------\n");
+}
