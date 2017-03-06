@@ -73,56 +73,85 @@ S32 read_wave_header(FILE* fp, struct WAVE_FORMAT* wavefmt, struct FACT_BLOCK* d
 
 S32 write_wave_pcm(FILE* fp, struct WAVE_FORMAT* wavefmt, COMPLEX* comx, U32 num)
 {
-	
-}
-
-S32 read_wave_pcm(FILE* fp, struct WAVE_FORMAT* wavefmt, COMPLEX* comx, U32 num)
-{
-	S32 res = -1;
 	U8* buffer;
+	S32 res = -1,i;
 	U32 len = wavefmt->wBlockAlign*num;
-	U32 readlen,i;
+
 	buffer = malloc(len);
 	if (!buffer)
 		return res;
 
-	readlen = fread(buffer, 1, len, fp);
-	//HPRINTF("readlen:%d\n", readlen);
-	for (i=0; i<readlen/wavefmt->wBlockAlign; i++)
+	memset(buffer, 0, len);
+	for (i=0; i<len/wavefmt->wBlockAlign; i++)
 	{
 		if (wavefmt->wChannels == 1)
 		{
 			if (wavefmt->wBlockAlign == 1)
-			{
-				HPRINTF("%d", buffer[i]);
-			}
+				 buffer[i]=comx[i].real;
 			else if (wavefmt->wBlockAlign == 2)
 			{
-				S16 x;
-				x = buffer[i*2+1];
-				x = (x<<8)|buffer[i*2];
-				HPRINTF("%d", x);
+				U16 x=comx[i].real;
+				buffer[i*2] = x&0xff;
+				buffer[i*2+1] = (x>>8)&0xff;
 			}
 		}
 		else if (wavefmt->wChannels == 2)
 		{
 			if (wavefmt->wBlockAlign == 2)
-			{
-				HPRINTF("%d,%d", buffer[i*2], buffer[i*2+1]);
-			}
+				buffer[i*2]=comx[i].real;
 			else if (wavefmt->wBlockAlign == 4)
 			{
-				S16 x,y;
-				x = buffer[i*4+1];
-				x = (x<<8)|buffer[i*4];
-				y = buffer[i*4+3];
-				y = (y<<8)|buffer[i*4+2];
-				HPRINTF("%d,y", x,y);
+				U16 x=comx[i].real;
+				buffer[i*4]=x&0xff;
+				buffer[i*4+1]=(x>>8)&0xff;
 			}
 		}
-		HPRINTF("\n");
+	}
+	len = fwrite(buffer, 1, len, fp);
+	free(buffer);
+	return res;
+}
+
+S32 read_wave_pcm(FILE* fp, struct WAVE_FORMAT* wavefmt, COMPLEX* comx, U32 num)
+{
+	U8* buffer;
+	S32 res = -1,i;
+	U32 len = wavefmt->wBlockAlign*num;
+
+	buffer = malloc(len);
+	if (!buffer)
+		return res;
+
+	len = fread(buffer, 1, len, fp);
+	for (i=0; i<len/wavefmt->wBlockAlign; i++)
+	{
+		if (wavefmt->wChannels == 1)
+		{
+			if (wavefmt->wBlockAlign == 1)
+				comx[i].real = buffer[i];
+			else if (wavefmt->wBlockAlign == 2)
+			{
+				S16 x;
+				x = buffer[i*2+1];
+				x = (x<<8)|buffer[i*2];
+				comx[i].real = x;
+			}
+		}
+		else if (wavefmt->wChannels == 2)
+		{
+			if (wavefmt->wBlockAlign == 2)
+				comx[i].real = buffer[i*2];
+			else if (wavefmt->wBlockAlign == 4)
+			{
+				S16 x;
+				x = buffer[i*4+1];
+				x = (x<<8)|buffer[i*4];
+				comx[i].real = x;
+			}
+		}
 	}
 	free(buffer);
+	return res;
 }
 
 S32 read_wave_pcm1(FILE* fp, struct WAVE_FORMAT* wavefmt, COMPLEX* comx, U32 num)
@@ -168,7 +197,7 @@ S32 read_wave_pcm1(FILE* fp, struct WAVE_FORMAT* wavefmt, COMPLEX* comx, U32 num
 					x = (x<<8)|buffer[i*4];
 					y = buffer[i*4+3];
 					y = (y<<8)|buffer[i*4+2];
-					HPRINTF("%d,y", x,y);
+					HPRINTF("%d,%d", x,y);
 				}
 			}
 			HPRINTF("\n");
@@ -197,9 +226,10 @@ S32 main(int argc, char* argv[])
 	if (!wavefile)
 		return res;
 
-	newfile  = open_wave_file("res.wav", "rb+");
+	newfile  = open_wave_file("res.wav", "wb");
 	if (!newfile)
 	{
+		HPRINTF("open res.wav failed!\n");
 		fclose(wavefile);
 		return res;
 	}
@@ -218,7 +248,7 @@ S32 main(int argc, char* argv[])
 		struct RIFF_HEADER header;
 		struct FMT_BLOCK fmt;
 
-		memcpy(fmt.szFmtID, "fmt", 4);
+		memcpy(fmt.szFmtID, "fmt ", 4);
 		fmt.dwFmtSize = sizeof(wavefmt);
 		memcpy(&fmt.wavFormat, &wavefmt, sizeof(wavefmt));
 
@@ -231,14 +261,23 @@ S32 main(int argc, char* argv[])
 		fwrite(&datafact, 1, sizeof(datafact), newfile);
 	}
 
+	
 	{
+		U32 len;
 		const U32 NUM = 128;
 		COMPLEX comx[NUM];
-		memset(comx, 0, sizeof(comx));
-		read_wave_pcm(wavefile, &wavefmt, comx, NUM);
-		write_wave_pcm(newfile, &wavefmt, comx, NUM);
+		for (len=0; len<datafact.dwFactSize; len+=wavefmt.wBlockAlign*NUM)
+		{
+			memset(comx, 0, sizeof(comx));
+			read_wave_pcm(wavefile, &wavefmt, comx, NUM);
+			fft(comx, NUM);
+			freq_small(comx, NUM, 8);
+			ifft(comx, NUM);
+			write_wave_pcm(newfile, &wavefmt, comx, NUM);
+		}
 	}
 wave_exit:
+	fclose(newfile);
 	fclose(wavefile);
 	return res;
 }

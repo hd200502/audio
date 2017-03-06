@@ -228,7 +228,7 @@ void freq_large(COMPLEX x[], U32 num, U32 param)
 {
 	
 }
-
+#if 0
 void main()
 {
 	U32 i=0;
@@ -258,3 +258,4 @@ void main()
 	
 	for (i=0; i<NUM; i++){HPRINTF("%f,%f\n", x[i].real, x[i].imag);} HPRINTF("--------------\n");
 }
+#endif
