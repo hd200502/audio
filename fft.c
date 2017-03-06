@@ -3,10 +3,6 @@
 
 #include "math.h"
 
-typedef struct {
-    float real;
-    float imag;
-} COMPLEX;
 
 const float sin_tb[] = {  // 精度(PI PI/2 PI/4 PI/8 PI/16 ... PI/(2^k))
 	0.000000, 1.000000, 0.707107, 0.382683, 0.195090, 0.098017, 
@@ -200,7 +196,32 @@ U32 complex_trunc(COMPLEX x[], U32 num, U32 param)
 
 void freq_small(COMPLEX x[], U32 num, U32 param)
 {
-	
+	U32 i;
+#if 1
+	while (param--)
+	{
+		for (i=num-1; i>0; i--)
+		{
+			x[i].real = x[i-1].real;
+			x[i].imag = x[i-1].imag;
+		}
+		x[0].real = 0;
+		x[0].imag = 0;
+	}
+#else
+	if (param > num)
+		return;
+	for (i=num-1; i>num-param; i--)
+	{
+		x[i].real = x[i-1].real;
+		x[i].imag = x[i-1].imag;
+	}
+	for (i=0; i<param; i++)
+	{
+		x[i].real = 0;
+		x[i].imag = 0;
+	}
+#endif
 }
 
 void freq_large(COMPLEX x[], U32 num, U32 param)
@@ -211,31 +232,27 @@ void freq_large(COMPLEX x[], U32 num, U32 param)
 void main()
 {
 	U32 i=0;
-	const U32 NUM=16;
+	const U32 NUM=128;
 	COMPLEX x[NUM];
 	memset(x, 0, sizeof(x));
 
 	for (i=0; i<NUM; i++)
 	{
-		x[i].real=sin(PI * i / 8);
+		x[i].real=cos(PI * i / 8);
 
-		if (x[i].real<0)
-			x[i].real=sin(PI * i / 8);
+		//if (x[i].real<0)
+		//	x[i].real=x[i].real*-1;
 		
 		x[i].imag=0;
 	}
 
-	for (i=0; i<NUM; i++){HPRINTF("%f,%f\n", x[i].real, x[i].imag);} HPRINTF("--------------\n");
+	for (i=0; i<NUM; i++){ HPRINTF("%f,%f\n", x[i].real, x[i].imag);} HPRINTF("--------------\n");
 
 	fft(x, NUM);
 
-	for (i=0; i<NUM; i++){HPRINTF("%f,%f\n", x[i].real, x[i].imag);} HPRINTF("--------------\n");
-
-	for (i=0; i<NUM; i++)
-	{
-		if ((x[i].real<0.0001 && x[i].real>-0.0001 && x[i].imag<0.0001 && x[i].imag>-0.0001))
-			;
-	}
+	//for (i=0; i<NUM; i++){HPRINTF("%f,%f\n", x[i].real, x[i].imag);} HPRINTF("--------------\n");
+	freq_small(x, NUM, 8);
+	//for (i=0; i<NUM; i++){HPRINTF("%f,%f\n", x[i].real, x[i].imag);} HPRINTF("--------------\n");
 
 	ifft(x,NUM);
 	

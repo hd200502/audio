@@ -23,5 +23,10 @@ typedef signed int                        S32;
 
 #define HPRINTF printf
 
+typedef struct {
+    float real;
+    float imag;
+} COMPLEX;
+
 #endif
 
