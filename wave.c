@@ -84,6 +84,7 @@ S32 write_wave_pcm(FILE* fp, struct WAVE_FORMAT* wavefmt, COMPLEX* comx, U32 num
 	memset(buffer, 0, len);
 	for (i=0; i<len/wavefmt->wBlockAlign; i++)
 	{
+		comx[i].real = comx[i].real*2;
 		if (wavefmt->wChannels == 1)
 		{
 			if (wavefmt->wBlockAlign == 1)
