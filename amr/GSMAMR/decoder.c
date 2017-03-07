@@ -19,6 +19,7 @@
 #ifndef IF2
 #include <string.h>
 #define AMR_MAGIC_NUMBER "#!AMR\n"
+#include "sp_dec.h"
 #endif
 #endif
 
