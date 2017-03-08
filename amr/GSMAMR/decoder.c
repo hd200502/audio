@@ -14,6 +14,7 @@
 #include <memory.h>
 #include "interf_dec.h"
 #include "typedef.h"
+#include "types.h"
 
 #ifndef ETSI
 #ifndef IF2
@@ -33,6 +34,34 @@ fprintf (stderr,
 "===================================================================\n"
 );
 }
+
+void write_wave_header(FILE* wavefile, int framecnt)
+{
+	struct RIFF_HEADER header;
+	struct FMT_BLOCK   fmt;
+	struct FACT_BLOCK  datafact;
+
+	memcpy(fmt.szFmtID, "fmt ", 4);
+	fmt.dwFmtSize = sizeof(fmt.wavFormat);
+	fmt.wavFormat.wFormatTag = 1; //PCM
+	fmt.wavFormat.wChannels  = 1; //Channel
+	fmt.wavFormat.dwSamplesPerSec  = 8000; //8KHZ
+	fmt.wavFormat.dwAvgBytesPerSec = 16000; //
+	fmt.wavFormat.wBlockAlign      = 2; //PCM
+	fmt.wavFormat.wBitsPerSample   = 16; //
+
+	memcpy(datafact.szFactID, "data", 4);
+	datafact.dwFactSize = framecnt*fmt.wavFormat.wBlockAlign*160;
+
+	memcpy(&header.szRiffID, "RIFF", 4);
+	header.dwRiffSize = datafact.dwFactSize+sizeof(datafact)+sizeof(struct FMT_BLOCK)+4;
+	memcpy(&header.szRiffFormat, "WAVE", 4);
+
+	fwrite(&header, 1, sizeof(header), wavefile);
+	fwrite(&fmt, 1, sizeof(fmt), wavefile);
+	fwrite(&datafact, 1, sizeof(datafact), wavefile);
+}
+
 /*
  * main
  *
@@ -120,6 +149,8 @@ int main (int argc, char * argv[]){
 #endif
 #endif
 
+	write_wave_header(file_speech, 0);
+
 #ifndef ETSI
 
    /* find mode, read file */
@@ -131,7 +162,9 @@ int main (int argc, char * argv[]){
       dec_mode = (analysis[0] >> 3) & 0x000F;
 #endif
 	  read_size = block_size[dec_mode];
-
+		//printf("%2x\t", analysis[0]);
+		//if ((frames%5) == 0)
+		//	printf("\n");
       fread(&analysis[1], sizeof (char), read_size, file_analysis );
 #else
 
@@ -144,16 +177,29 @@ int main (int argc, char * argv[]){
       frames ++;
 
       /* call decoder */
+	  memset(synth, 0, sizeof(synth));
       Decoder_Interface_Decode(destate, analysis, synth, 0);
 
+	  if (0){
+		int i;
+		for (i=0; i<160; i++){
+			synth[i] = ((synth[i]&0xFF)<<8) | ((synth[i]>>8)&0xff);
+		}
+	  }
       fwrite( synth, sizeof (short), 160, file_speech );
    }
 
-   Decoder_Interface_exit(destate);
+	Decoder_Interface_exit(destate);
+	printf("\n");
+	fclose(file_analysis);
 
-   fclose(file_speech);
-   fclose(file_analysis);
-   fprintf ( stderr, "\n%s%i%s\n","Decoded ", frames, " frames.");
+	fseek(file_speech, 0, SEEK_SET);
 
-   return 0;
+	write_wave_header(file_speech, frames);
+	fflush(file_speech);
+	fclose(file_speech);
+
+	fprintf ( stderr, "\n%s%i%s\n","Decoded ", frames, " frames.");
+
+	return 0;
 }
