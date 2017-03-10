@@ -25,7 +25,7 @@
 #endif
 
 void Copyright(void){
-fprintf (stderr,
+AMRPRINTF (
 "===================================================================\n"
 " TS 26.104                                                         \n"
 " R99   V3.5.0 2003-03                                              \n"
@@ -116,20 +116,20 @@ int main (int argc, char * argv[]){
 
       file_speech = fopen(argv[2], "wb");
       if (file_speech == NULL){
-         fprintf ( stderr, "%s%s%s\n","Use: ",argv[0], " input.file output.file " );
+         AMRPRINTF (  "%s%s%s\n","Use: ",argv[0], " input.file output.file " );
          return 1;
       }
 
       file_analysis = fopen(argv[1], "rb");
       if (file_analysis == NULL){
-         fprintf ( stderr, "%s%s%s\n","Use: ",argv[0], " input.file output.file " );
+         AMRPRINTF (  "%s%s%s\n","Use: ",argv[0], " input.file output.file " );
          fclose(file_speech);
          return 1;
       }
 
    }
    else {
-      fprintf ( stderr, "%s%s%s\n","Use: ",argv[0], " input.file output.file " );
+      AMRPRINTF (  "%s%s%s\n","Use: ",argv[0], " input.file output.file " );
       return 1;
    }
    Copyright();
@@ -141,7 +141,7 @@ int main (int argc, char * argv[]){
    /* read and verify magic number */
    fread( magic, sizeof( char ), strlen( AMR_MAGIC_NUMBER ), file_analysis );
    if ( strncmp( magic, AMR_MAGIC_NUMBER, strlen( AMR_MAGIC_NUMBER ) ) ) {
-	   fprintf( stderr, "%s%s\n", "Invalid magic number: ", magic );
+	   AMRPRINTF(  "%s%s\n", "Invalid magic number: ", magic );
 	   fclose( file_speech );
 	   fclose( file_analysis );
 	   return 1;
@@ -199,7 +199,7 @@ int main (int argc, char * argv[]){
 	fflush(file_speech);
 	fclose(file_speech);
 
-	fprintf ( stderr, "\n%s%i%s\n","Decoded ", frames, " frames.");
+	AMRPRINTF (  "\n%s%i%s\n","Decoded ", frames, " frames.");
 
 	return 0;
 }

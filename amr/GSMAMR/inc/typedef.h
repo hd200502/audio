@@ -10,8 +10,8 @@
  */
 /* This is valid for PC */
 
-#ifndef _TYPEDEF_H
-#define _TYPEDEF_H
+#ifndef AMR_TYPEDEF_H
+#define AMR_TYPEDEF_H
 
 typedef char Word8;
 typedef unsigned char UWord8;
@@ -20,4 +20,14 @@ typedef long Word32;
 typedef float Float32;
 typedef double Float64;
 
+#if 0
+#define AMR_MEM_ALLOC(x) malloc(x)
+#define AMR_MEM_FREE(x) free(x)
+#define AMRPRINTF(...) fprintf(stderr, ##__VA_ARGS__)
+#else
+//#define AMRPRINTF(...) kal_prompt_trace(MOD_MXGPS, ##__VA_ARGS__)
+#define AMRPRINTF(...)
+#define AMR_MEM_ALLOC(x) malloc(x)
+#define AMR_MEM_FREE(x) free(x)
+#endif
 #endif

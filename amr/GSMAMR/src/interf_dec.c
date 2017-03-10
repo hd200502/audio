@@ -25,7 +25,7 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
-#include <memory.h>
+/* #include <memory.h> */
 #include "typedef.h"
 #include "sp_dec.h"
 #include "interf_rom.h"
@@ -587,16 +587,16 @@ void * Decoder_Interface_init( void )
    dec_interface_State * s;
 
    /* allocate memory */
-   if ( ( s = ( dec_interface_State * ) malloc( sizeof( dec_interface_State ) ) ) ==
+   if ( ( s = ( dec_interface_State * ) AMR_MEM_ALLOC( sizeof( dec_interface_State ) ) ) ==
          NULL ) {
-      fprintf( stderr, "Decoder_Interface_init: "
+      AMRPRINTF(  "Decoder_Interface_init: "
             "can not malloc state structure\n" );
       return NULL;
    }
    s->decoder_State = Speech_Decode_Frame_init( );
 
    if ( s->decoder_State == NULL ) {
-      free( s );
+      AMR_MEM_FREE( s );
       return NULL;
    }
    Decoder_Interface_reset( s );
@@ -624,7 +624,7 @@ void Decoder_Interface_exit( void *state )
 
    /* free memory */
    Speech_Decode_Frame_exit(s->decoder_State );
-   free( s );
+   AMR_MEM_FREE( s );
    s = NULL;
    state = NULL;
 }

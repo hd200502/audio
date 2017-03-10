@@ -38,7 +38,7 @@ static const short modeConv[]={
 
 static void Usage(char* argv[])
 {
-   fprintf (stderr,
+   AMRPRINTF (
       "Usage of %s:\n\n"
       "[-dtx] mode speech_file bitstream_file \n\n"
       "or \n\n"
@@ -47,7 +47,7 @@ static void Usage(char* argv[])
       argv[0]);
 }
 void Copyright(void){
-fprintf (stderr,
+AMRPRINTF (
 "===================================================================\n"
 " TS 26.104                                                         \n"
 " R99   V3.5.0 2003-03                                              \n"
@@ -181,9 +181,9 @@ int main (int argc, char * argv[]){
 
    Copyright();
 #ifndef VAD2
-   fprintf( stderr, "%s\n", "Code compiled with VAD option: VAD1");
+   AMRPRINTF(  "%s\n", "Code compiled with VAD option: VAD1");
 #else
-   fprintf( stderr, "%s\n", "Code compiled with VAD option: VAD2");
+   AMRPRINTF(  "%s\n", "Code compiled with VAD option: VAD2");
 #endif
 
 #ifndef ETSI
@@ -225,12 +225,12 @@ int main (int argc, char * argv[]){
 
 #ifndef ETSI
 #ifdef IF2
-   fprintf ( stderr, "\n%s%i%s%i%s\n", "Frame structure AMR IF2: ", frames, " frames, ", bytes, " bytes.");
+   AMRPRINTF (  "\n%s%i%s%i%s\n", "Frame structure AMR IF2: ", frames, " frames, ", bytes, " bytes.");
 #else
-   fprintf ( stderr, "\n%s%i%s%i%s\n", "Frame structure AMR MIME file storage format: ", frames, " frames, ", bytes, " bytes.");
+   AMRPRINTF (  "\n%s%i%s%i%s\n", "Frame structure AMR MIME file storage format: ", frames, " frames, ", bytes, " bytes.");
 #endif
 #else
-   fprintf ( stderr, "\n%s%i%s\n", "Frame structure AMR ETSI: ", frames, " frames. ");
+   AMRPRINTF (  "\n%s%i%s\n", "Frame structure AMR ETSI: ", frames, " frames. ");
 #endif
 
    fclose(file_speech);

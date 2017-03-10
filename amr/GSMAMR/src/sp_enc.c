@@ -23,7 +23,7 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
-#include <memory.h>
+/*  #include <memory.h> */
 #include <math.h>
 #include <float.h>
 #include "sp_enc.h"
@@ -3059,8 +3059,8 @@ static void Norm_Corr( Float32 exc[], Float32 xn[], Float32 h[], Word32 t_min,
  *    Interpolating the normalized correlation with 1/3 or 1/6 resolution.
  *
  *    The interpolation is performed using an FIR filter b24
- *    based on a Hamming windowed sin(x)/x function truncated at ±23
- *    and padded with zeros at ±24 (b24(24) = 0). The filter has its
+ *    based on a Hamming windowed sin(x)/x function truncated at 23
+ *    and padded with zeros at 24 (b24(24) = 0). The filter has its
  *    cut-off frequency (-3 dB) at 3 600 Hz in the over-sampled domain.
  *    The interpolated values of R(k) for the fractions -3/6 to 3/6
  *    are obtained using the interpolation formula:
@@ -3353,7 +3353,7 @@ static Word32 Enc_lag6( Word32 T0, Word32 T0_frac, Word32 T0_min, Word16
  *
  *    Closed-loop pitch analysis is performed around
  *    the open-loop pitch estimates on a subframe basis.
- *    In the first (and third) subframe the range Top±3,
+ *    In the first (and third) subframe the range Top3,
  *    bounded by 18...143, is searched. For the other subframes,
  *    closed-loop pitch analysis is performed around the integer pitch
  *    selected in the previous subframe, as described above.
@@ -3377,8 +3377,8 @@ static Word32 Enc_lag6( Word32 T0, Word32 T0_frac, Word32 T0_min, Word16
  *    The fractional pitch search is performed by interpolating
  *    the normalized correlation R(k) and searching for its maximum.
  *    The interpolation is performed using an FIR filter b24
- *    based on a Hamming windowed sin(x)/x function truncated at ±23
- *    and padded with zeros at ±24 (b24(24) = 0). The filter has its
+ *    based on a Hamming windowed sin(x)/x function truncated at 23
+ *    and padded with zeros at 24 (b24(24) = 0). The filter has its
  *    cut-off frequency (-3 dB) at 3 600 Hz in the over-sampled domain.
  *    The interpolated values of R(k) for the fractions -3/6 to 3/6
  *    are obtained using the interpolation formula:
@@ -3602,7 +3602,7 @@ static Word32 Pitch_fr( Word32 *T0_prev_subframe, enum Mode mode, Word32 T_op[],
  *    n = 0, ...,39, t = 0, ...,5.
  *
  *    The interpolation filter b60 is based on a Hamming windowed sin(x)/x
- *    function truncated at ± 59 and padded with zeros at ± 60 (b60(60)=0)).
+ *    function truncated at  59 and padded with zeros at  60 (b60(60)=0)).
  *    The filter has a cut-off frequency (-3 dB) at 3 600 Hz in
  *    the over-sampled domain.
  *
@@ -10781,7 +10781,7 @@ the_end:
 static Word32 Pre_Process_reset( Pre_ProcessState *state )
 {
    if ( state == ( Pre_ProcessState * )NULL ) {
-      fprintf( stderr, "Pre_Process_reset: invalid parameter\n" );
+      AMRPRINTF(  "Pre_Process_reset: invalid parameter\n" );
       return-1;
    }
    state->y2 = 0;
@@ -10811,7 +10811,7 @@ static void Pre_Process_exit( Pre_ProcessState **state )
       return;
 
    /* deallocate memory */
-   free( *state );
+   AMR_MEM_FREE( *state );
    *state = NULL;
    return;
 }
@@ -10835,15 +10835,15 @@ static Word32 Pre_Process_init( Pre_ProcessState **state )
    Pre_ProcessState * s;
 
    if ( state == ( Pre_ProcessState * * )NULL ) {
-      fprintf( stderr, "Pre_Process_init: invalid parameter\n" );
+      AMRPRINTF(  "Pre_Process_init: invalid parameter\n" );
       return-1;
    }
    *state = NULL;
 
    /* allocate memory */
-   if ( ( s = ( Pre_ProcessState * ) malloc( sizeof( Pre_ProcessState ) ) ) ==
+   if ( ( s = ( Pre_ProcessState * ) AMR_MEM_ALLOC( sizeof( Pre_ProcessState ) ) ) ==
          NULL ) {
-      fprintf( stderr, "Pre_Process_init: can not malloc state structure\n" );
+      AMRPRINTF(  "Pre_Process_init: can not malloc state structure\n" );
       return-1;
    }
    Pre_Process_reset( s );
@@ -11097,101 +11097,101 @@ static Word32 cod_amr_init( cod_amrState **state, Word32 dtx )
 {
    cod_amrState * s;
 
-   if ( ( s = ( cod_amrState * ) malloc( sizeof( cod_amrState ) ) ) == NULL ) {
-      fprintf( stderr, "can not malloc state structure\n" );
+   if ( ( s = ( cod_amrState * ) AMR_MEM_ALLOC( sizeof( cod_amrState ) ) ) == NULL ) {
+      AMRPRINTF(  "can not malloc state structure\n" );
       return-1;
    }
 
    /* init clLtpState */
-   if ( ( s->clLtpSt = ( clLtpState * ) malloc( sizeof( clLtpState ) ) ) == NULL
+   if ( ( s->clLtpSt = ( clLtpState * ) AMR_MEM_ALLOC( sizeof( clLtpState ) ) ) == NULL
          ) {
-      fprintf( stderr, "can not malloc state structure\n" );
+      AMRPRINTF(  "can not malloc state structure\n" );
       return-1;
    }
 
    /* init Pitch_frState */
-   if ( ( s->clLtpSt->pitchSt = ( Pitch_frState * ) malloc( sizeof(
+   if ( ( s->clLtpSt->pitchSt = ( Pitch_frState * ) AMR_MEM_ALLOC( sizeof(
          Pitch_frState ) ) ) == NULL ) {
-      fprintf( stderr, "can not malloc state structure\n" );
+      AMRPRINTF(  "can not malloc state structure\n" );
       return-1;
    }
 
    /* init lspState */
-   if ( ( s->lspSt = ( lspState * ) malloc( sizeof( lspState ) ) ) == NULL ) {
-      fprintf( stderr, "can not malloc state structure\n" );
+   if ( ( s->lspSt = ( lspState * ) AMR_MEM_ALLOC( sizeof( lspState ) ) ) == NULL ) {
+      AMRPRINTF(  "can not malloc state structure\n" );
       return-1;
    }
 
    /* init Q_plsfState */
-   if ( ( s->lspSt->qSt = ( Q_plsfState * ) malloc( sizeof( Q_plsfState ) ) ) ==
+   if ( ( s->lspSt->qSt = ( Q_plsfState * ) AMR_MEM_ALLOC( sizeof( Q_plsfState ) ) ) ==
          NULL ) {
-      fprintf( stderr, "can not malloc state structure\n" );
+      AMRPRINTF(  "can not malloc state structure\n" );
       return-1;
    }
 
    /* init gainQuantState */
-   if ( ( s->gainQuantSt = ( gainQuantState * ) malloc( sizeof( gainQuantState )
+   if ( ( s->gainQuantSt = ( gainQuantState * ) AMR_MEM_ALLOC( sizeof( gainQuantState )
          ) ) == NULL ) {
-      fprintf( stderr, "can not malloc state structure\n" );
+      AMRPRINTF(  "can not malloc state structure\n" );
       return-1;
    }
 
    /* init gc_predState x2 */
-   if ( ( s->gainQuantSt->gc_predSt = ( gc_predState * ) malloc( sizeof(
+   if ( ( s->gainQuantSt->gc_predSt = ( gc_predState * ) AMR_MEM_ALLOC( sizeof(
          gc_predState ) ) ) == NULL ) {
-      fprintf( stderr, "can not malloc state structure\n" );
+      AMRPRINTF(  "can not malloc state structure\n" );
       return-1;
    }
 
-   if ( ( s->gainQuantSt->gc_predUncSt = ( gc_predState * ) malloc( sizeof(
+   if ( ( s->gainQuantSt->gc_predUncSt = ( gc_predState * ) AMR_MEM_ALLOC( sizeof(
          gc_predState ) ) ) == NULL ) {
-      fprintf( stderr, "can not malloc state structure\n" );
+      AMRPRINTF(  "can not malloc state structure\n" );
       return-1;
    }
 
    /* init gain_adaptState */
-   if ( ( s->gainQuantSt->adaptSt = ( gain_adaptState * ) malloc( sizeof(
+   if ( ( s->gainQuantSt->adaptSt = ( gain_adaptState * ) AMR_MEM_ALLOC( sizeof(
          gain_adaptState ) ) ) == NULL ) {
-      fprintf( stderr, "can not malloc state structure\n" );
+      AMRPRINTF(  "can not malloc state structure\n" );
       return-1;
    }
 
    /* init pitchOLWghtState */
-   if ( ( s->pitchOLWghtSt = ( pitchOLWghtState * ) malloc( sizeof(
+   if ( ( s->pitchOLWghtSt = ( pitchOLWghtState * ) AMR_MEM_ALLOC( sizeof(
          pitchOLWghtState ) ) ) == NULL ) {
-      fprintf( stderr, "can not malloc state structure\n" );
+      AMRPRINTF(  "can not malloc state structure\n" );
       return-1;
    }
 
    /* init tonStabState */
-   if ( ( s->tonStabSt = ( tonStabState * ) malloc( sizeof( tonStabState ) ) )
+   if ( ( s->tonStabSt = ( tonStabState * ) AMR_MEM_ALLOC( sizeof( tonStabState ) ) )
          == NULL ) {
-      fprintf( stderr, "can not malloc state structure\n" );
+      AMRPRINTF(  "can not malloc state structure\n" );
       return-1;
    }
 
    /* init lpcState */
-   if ( ( s->lpcSt = ( lpcState * ) malloc( sizeof( lpcState ) ) ) == NULL ) {
-      fprintf( stderr, "can not malloc state structure\n" );
+   if ( ( s->lpcSt = ( lpcState * ) AMR_MEM_ALLOC( sizeof( lpcState ) ) ) == NULL ) {
+      AMRPRINTF(  "can not malloc state structure\n" );
       return-1;
    }
 
    /* init LevinsonState */
-   if ( ( s->lpcSt->LevinsonSt = ( LevinsonState * ) malloc( sizeof(
+   if ( ( s->lpcSt->LevinsonSt = ( LevinsonState * ) AMR_MEM_ALLOC( sizeof(
          LevinsonState ) ) ) == NULL ) {
-      fprintf( stderr, "can not malloc state structure\n" );
+      AMRPRINTF(  "can not malloc state structure\n" );
       return-1;
    }
 
-   if ( ( s->vadSt = ( vadState * ) malloc( sizeof( vadState ) ) ) == NULL ) {
-      fprintf( stderr, "can not malloc state structure\n" );
+   if ( ( s->vadSt = ( vadState * ) AMR_MEM_ALLOC( sizeof( vadState ) ) ) == NULL ) {
+      AMRPRINTF(  "can not malloc state structure\n" );
       return-1;
    }
 
    /* Init dtx_encState */
-   if ( ( s->dtxEncSt = ( dtx_encState * ) malloc( sizeof( dtx_encState ) ) ) ==
+   if ( ( s->dtxEncSt = ( dtx_encState * ) AMR_MEM_ALLOC( sizeof( dtx_encState ) ) ) ==
          NULL ) {
-      fprintf( stderr, "can not malloc state structure\n" );
+      AMRPRINTF(  "can not malloc state structure\n" );
       return-1;
    }
    cod_amr_reset( s, dtx );
@@ -11219,21 +11219,21 @@ static void cod_amr_exit( cod_amrState **state )
       return;
 
    /* deallocate memory */
-   free( ( *state )->vadSt );
-   free( ( *state )->gainQuantSt->gc_predSt );
-   free( ( *state )->gainQuantSt->gc_predUncSt );
-   free( ( *state )->gainQuantSt->adaptSt );
-   free( ( *state )->clLtpSt->pitchSt );
-   free( ( *state )->lspSt->qSt );
-   free( ( *state )->lpcSt->LevinsonSt );
-   free( ( *state )->lpcSt );
-   free( ( *state )->lspSt );
-   free( ( *state )->clLtpSt );
-   free( ( *state )->gainQuantSt );
-   free( ( *state )->pitchOLWghtSt );
-   free( ( *state )->tonStabSt );
-   free( ( *state )->dtxEncSt );
-   free( *state );
+   AMR_MEM_FREE( ( *state )->vadSt );
+   AMR_MEM_FREE( ( *state )->gainQuantSt->gc_predSt );
+   AMR_MEM_FREE( ( *state )->gainQuantSt->gc_predUncSt );
+   AMR_MEM_FREE( ( *state )->gainQuantSt->adaptSt );
+   AMR_MEM_FREE( ( *state )->clLtpSt->pitchSt );
+   AMR_MEM_FREE( ( *state )->lspSt->qSt );
+   AMR_MEM_FREE( ( *state )->lpcSt->LevinsonSt );
+   AMR_MEM_FREE( ( *state )->lpcSt );
+   AMR_MEM_FREE( ( *state )->lspSt );
+   AMR_MEM_FREE( ( *state )->clLtpSt );
+   AMR_MEM_FREE( ( *state )->gainQuantSt );
+   AMR_MEM_FREE( ( *state )->pitchOLWghtSt );
+   AMR_MEM_FREE( ( *state )->tonStabSt );
+   AMR_MEM_FREE( ( *state )->dtxEncSt );
+   AMR_MEM_FREE( *state );
    *state = NULL;
    return;
 }
@@ -11258,9 +11258,9 @@ void * Speech_Encode_Frame_init( int dtx )
    Speech_Encode_FrameState * s;
 
    /* allocate memory */
-   if ( ( s = ( Speech_Encode_FrameState * ) malloc( sizeof(
+   if ( ( s = ( Speech_Encode_FrameState * ) AMR_MEM_ALLOC( sizeof(
          Speech_Encode_FrameState ) ) ) == NULL ) {
-      fprintf( stderr, "Speech_Encode_Frame_init: can not malloc state "
+      AMRPRINTF(  "Speech_Encode_Frame_init: can not malloc state "
             "structure\n" );
       return NULL;
    }
@@ -11296,7 +11296,7 @@ int Speech_Encode_Frame_reset( void *st, int dtx )
    state = ( Speech_Encode_FrameState * )st;
 
    if ( ( Speech_Encode_FrameState * )state == NULL ) {
-      fprintf( stderr, "Speech_Encode_Frame_reset: invalid parameter\n" );
+      AMRPRINTF(  "Speech_Encode_Frame_reset: invalid parameter\n" );
       return-1;
    }
    Pre_Process_reset( state->pre_state );
@@ -11328,7 +11328,7 @@ void Speech_Encode_Frame_exit( void **st )
    ;
 
    /* deallocate memory */
-   free( *st );
+   AMR_MEM_FREE( *st );
    *st = NULL;
    return;
 }

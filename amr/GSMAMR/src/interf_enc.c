@@ -27,7 +27,7 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
-#include <memory.h>
+/* #include <memory.h> */
 #include "sp_enc.h"
 #include "interf_rom.h"
 
@@ -760,9 +760,9 @@ void * Encoder_Interface_init( int dtx )
    enc_interface_State * s;
 
    /* allocate memory */
-   if ( ( s = ( enc_interface_State * ) malloc( sizeof( enc_interface_State ) ) ) ==
+   if ( ( s = ( enc_interface_State * ) AMR_MEM_ALLOC( sizeof( enc_interface_State ) ) ) ==
          NULL ) {
-      fprintf( stderr, "Encoder_Interface_init: "
+      AMRPRINTF(  "Encoder_Interface_init: "
             "can not malloc state structure\n" );
       return NULL;
    }
@@ -793,6 +793,6 @@ void Encoder_Interface_exit( void *state )
 
    /* free memory */
    Speech_Encode_Frame_exit( &s->encoderState );
-   free( s );
+   AMR_MEM_FREE( s );
    state = NULL;
 }
