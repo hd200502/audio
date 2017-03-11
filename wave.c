@@ -196,7 +196,10 @@ S32 main(int argc, char* argv[])
 
 	wavefile = open_wave_file(filename, "rb");
 	if (!wavefile)
+	{
+		HPRINTF("open %s failed!\n", filename);
 		return res;
+	}
 
 	newfile  = open_wave_file("res.wav", "wb");
 	if (!newfile)
